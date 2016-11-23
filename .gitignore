@@ -90,6 +90,7 @@ ENV/
 
 # editor backup files
 *~
+*.swp
 
 # pickle files
 *.pickle
