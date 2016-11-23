@@ -87,3 +87,10 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# editor backup files
+*~
+*.swp
+
+# pickle files
+*.pickle
