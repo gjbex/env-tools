@@ -72,7 +72,8 @@ def compute_diff(env1, env2, include_all=False):
             diffs[name] = diff
     if not include_all:
         for name in IGNORE_LIST:
-            del diffs[name]
+            if name in diffs:
+                del diffs[name]
     return diffs
 
 
