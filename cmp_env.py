@@ -50,7 +50,10 @@ class Diff(object):
         return diff_str
 
 
-def compute_diff(env1, env2):
+IGNORE_LIST = ['_', 'WINDOWID', 'OLDPWD']
+
+
+def compute_diff(env1, env2, include_all=False):
     diffs = {}
     for name, value in env1.iteritems():
         if name not in env2:
@@ -67,25 +70,46 @@ def compute_diff(env1, env2):
             diff = Diff(name)
             diff.right = value
             diffs[name] = diff
-    del diffs['_']
+    if not include_all:
+        for name in IGNORE_LIST:
+            del diffs[name]
     return diffs
 
-def compute_opcodes(str1, str2, junk):
-    pass
+
+def show_opcodes(str1, str2, junk=':'):
+    junk_func = lambda x: x == junk
+    seq_matcher = SequenceMatcher(junk_func, str1, str2)
+    for opcode in seq_matcher.get_opcodes():
+        op = opcode[0]
+        left = str1[opcode[1]:opcode[2]].strip(junk)
+        right = str2[opcode[3]:opcode[4]].strip(junk)
+        if op == 'insert' and opcode[1] == 0:
+            print("prepend '{0}'".format(right))
+        elif op == 'insert' and opcode[2] == len(str1):
+            print("append '{0}'".format(right))
+        elif op != 'equal':
+            print("{op} '{left}' -> '{right}'".format(op=op,
+                                                      left=left,
+                                                      right=right))
     
 if __name__ == '__main__':
     arg_parser = ArgumentParser(description='read environment from file, '
                                             'and compare to current '
                                             'environment')
     arg_parser.add_argument('file', help='file to read environment frmo')
+    arg_parser.add_argument('--all', action='store_true',
+                            help='show all variables')
     arg_parser.add_argument('--var', help='variable to detail')
+    arg_parser.add_argument('--sep', default=':',
+                            help='character separating values')
     options = arg_parser.parse_args()
     with open(options.file, 'rb') as env_file:
         prev_env = pickle.load(env_file)
     curr_env = os.environ
-    diffs = compute_diff(prev_env, curr_env)
+    diffs = compute_diff(prev_env, curr_env, options.all)
     if options.var:
-        pass
+        name = options.var
+        show_opcodes(diffs[name].left, diffs[name].right, options.sep)
     else:
         for name in sorted(diffs.iterkeys()):
             print(diffs[name])
