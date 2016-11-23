@@ -50,7 +50,8 @@ class Diff(object):
         return diff_str
 
 
-IGNORE_LIST = ['_', 'WINDOWID', 'OLDPWD']
+IGNORE_LIST = ['_', 'WINDOWID', 'OLDPWD', 'DISPLAY', 'SSH_CLIENT',
+               'SSH_CONNECTION', 'SSH_TTY', 'XDG_SESSION_ID']
 
 
 def compute_diff(env1, env2, include_all=False):
