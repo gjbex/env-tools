@@ -73,13 +73,27 @@ def compute_diff(env1, env2):
 def compute_opcodes(str1, str2, junk):
     pass
     
+
+def read_ignore(file_name):
+    ignore = []
+    with open(file_name, 'r') as ignore_file:
+        for line in ignore_file:
+            line = line.strip()
+            if line and not line.startswith('#'):
+                ignore.extend(line.strip().split(';'))
+    return ignore
+
 if __name__ == '__main__':
     arg_parser = ArgumentParser(description='read environment from file, '
                                             'and compare to current '
                                             'environment')
     arg_parser.add_argument('file', help='file to read environment frmo')
     arg_parser.add_argument('--var', help='variable to detail')
+    arg_parser.add_argument('--ignore', help='file containing environment '
+                                             'variables to ignore')
     options = arg_parser.parse_args()
+    if options.ignore:
+        IGNORE_LIST = read_ignore(options.ignore)
     with open(options.file, 'rb') as env_file:
         prev_env = pickle.load(env_file)
     curr_env = os.environ
